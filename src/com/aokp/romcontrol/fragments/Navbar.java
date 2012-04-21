@@ -163,6 +163,10 @@ public class Navbar extends AOKPPreferenceFragment implements
             Log.e("NavBar", "is tablet");
             prefs.removePreference(mNavBarMenuDisplay);
         }
+
+        if (!hasHardwareButtons) {
+            ((PreferenceGroup) findPreference("advanced_cat")).removePreference(mHomeLongpress);
+        }
         refreshSettings();
         setHasOptionsMenu(true);
     }
