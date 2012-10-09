@@ -7,6 +7,8 @@ LOCAL_STATIC_JAVA_LIBRARIES := android-support-v13
 
 LOCAL_SRC_FILES := $(call all-subdir-java-files)
 
+LOCAL_STATIC_JAVA_LIBRARIES := android-support-v13 android-support-v4
+
 LOCAL_PACKAGE_NAME := ROMControl
 LOCAL_CERTIFICATE := platform
 

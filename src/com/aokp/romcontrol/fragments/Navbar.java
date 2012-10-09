@@ -60,6 +60,7 @@ import com.aokp.romcontrol.util.Helpers;
 import com.aokp.romcontrol.ROMControlActivity;
 import com.aokp.romcontrol.util.ShortcutPickerHelper;
 import com.aokp.romcontrol.widgets.NavBarItemPreference;
+import com.aokp.romcontrol.widgets.WidgetPagerPreference;
 import com.aokp.romcontrol.widgets.SeekBarPreference;
 import com.aokp.romcontrol.fragments.NavRingTargets;
 
@@ -80,9 +81,11 @@ public class Navbar extends AOKPPreferenceFragment implements
     private static final String NAVIGATION_BAR_HEIGHT_LANDSCAPE = "navigation_bar_height_landscape";
     private static final String NAVIGATION_BAR_WIDTH = "navigation_bar_width";
     private static final String PREF_NAVRING_AMOUNT = "pref_navring_amount";
+	private static final String NAVIGATION_BAR_WIDGETS = "navigation_bar_widgets";
 
     public static final int REQUEST_PICK_CUSTOM_ICON = 200;
     public static final int REQUEST_PICK_LANDSCAPE_ICON = 201;
+    private static final int DIALOG_NAVBAR_ENABLE = 203;
     private static final int DIALOG_NAVBAR_HEIGHT_REBOOT = 204;
 
     public static final String PREFS_NAV_BAR = "navbar";
@@ -102,6 +105,7 @@ public class Navbar extends AOKPPreferenceFragment implements
     ListPreference mNavigationBarHeightLandscape;
     ListPreference mNavigationBarWidth;
     SeekBarPreference mButtonAlpha;
+	WidgetPagerPreference mWidgetPreference;
 
     private int mPendingIconIndex = -1;
     private int mPendingWidgetDrawer = -1;
@@ -190,6 +194,8 @@ public class Navbar extends AOKPPreferenceFragment implements
 
         mNavigationBarWidth = (ListPreference) findPreference("navigation_bar_width");
         mNavigationBarWidth.setOnPreferenceChangeListener(this);
+        
+        mWidgetPreference = (WidgetPagerPreference) findPreference(NAVIGATION_BAR_WIDGETS);
 
         if (mTablet) {
             prefs.removePreference(mNavBarMenuDisplay);
@@ -237,6 +243,9 @@ public class Navbar extends AOKPPreferenceFragment implements
                 Settings.System.putString(getActivity().getContentResolver(),
                         Settings.System.NAVIGATION_CUSTOM_APP_ICONS[2], "");
                 refreshSettings();
+                return true;
+            case R.id.reset_widgets:
+                mWidgetPreference.resetNavBarWidgets();
                 return true;
             default:
                 return super.onContextItemSelected(item);
@@ -402,7 +411,33 @@ public class Navbar extends AOKPPreferenceFragment implements
 
     @Override
     public Dialog onCreateDialog(int dialogId) {
+        LayoutInflater factory = LayoutInflater.from(mContext);
+
         switch (dialogId) {
+            case DIALOG_NAVBAR_ENABLE:
+                final View textEntryView = factory.inflate(
+                        R.layout.alert_dialog_text_entry, null);
+                return new AlertDialog.Builder(getActivity())
+                    .setTitle(getResources().getString(R.string.navbar_enable_dialog_title))
+                    .setMessage(getResources().getString(R.string.navbar_enable_dialog_msg))
+                    .setCancelable(false)
+                    .setPositiveButton(
+                            getResources().getString(R.string.navbar_enable_dialog_Positive),
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    PowerManager pm = (PowerManager) getActivity()
+                                            .getSystemService(Context.POWER_SERVICE);
+                                    pm.reboot("New navbar");
+                            }
+                        })
+                    .setNegativeButton(
+                            getResources().getString(R.string.navbar_enable_dialog_negative), new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+
+                                dialog.dismiss();
+                            }
+                        }).create();
             case DIALOG_NAVBAR_HEIGHT_REBOOT:
                 return new AlertDialog.Builder(getActivity())
                         .setTitle(getResources().getString(R.string.navbar_height_dialog_title))
@@ -651,22 +686,29 @@ public class Navbar extends AOKPPreferenceFragment implements
 
         if (uri.startsWith("**")) {
             if (uri.equals("**home**")) {
+
                 return getResources().getDrawable(R.drawable.ic_sysbar_home);
             } else if (uri.equals("**back**")) {
+
                 return getResources().getDrawable(R.drawable.ic_sysbar_back);
             } else if (uri.equals("**recents**")) {
+
                 return getResources().getDrawable(R.drawable.ic_sysbar_recent);
             } else if (uri.equals("**search**")) {
+
                 return getResources().getDrawable(R.drawable.ic_sysbar_search);
             } else if (uri.equals("**screenshot**")) {
                 return getResources().getDrawable(R.drawable.ic_sysbar_screenshot);
             } else if (uri.equals("**menu**")) {
+
                 return getResources().getDrawable(R.drawable.ic_sysbar_menu_big);
              } else if (uri.equals("**ime**")) {
                 return getResources().getDrawable(R.drawable.ic_sysbar_ime_switcher);
             } else if (uri.equals("**kill**")) {
+
                 return getResources().getDrawable(R.drawable.ic_sysbar_killtask);
             } else if (uri.equals("**power**")) {
+
                 return getResources().getDrawable(R.drawable.ic_sysbar_power);
             } else if (uri.equals("**notifications**")) {
                 return getResources().getDrawable(R.drawable.ic_sysbar_notifications);
